@@ -50,12 +50,12 @@
       return this.set('_buffers', Ember.Map.create());
     },
     _safeSave: function() {
-      if (!this.get('content.store')) {
+      if (!this.get('content')) {
         return;
       }
       if (!this._isInflight()) {
         this._flushBuffers();
-        return this.get('content.store').commit();
+        return this.get('content').save();
       } else {
         return this._debouncedSave();
       }
@@ -63,9 +63,16 @@
     _isInflight: function() {
       return this.get('content.isSaving') || this.get('content.isLoading');
     },
-    _debouncedSave: Ember.debounce((function() {
-      return this._safeSave();
-    }), BUFFER_DELAY),
+    _debouncedSave: function(options) {
+      if (options == null) {
+        options = {};
+      }
+      if (options.now) {
+        return this._safeSave();
+      } else {
+        return Ember.run.debounce(this, '_safeSave', BUFFER_DELAY);
+      }
+    },
     _saveNowAndClear: (function() {
       if (!this.get('content')) {
         return;

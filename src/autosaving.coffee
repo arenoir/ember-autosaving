@@ -45,17 +45,22 @@ Ember.AutoSaving = Ember.Mixin.create
   # Write the buffers to the actual content and save or
   # try saving again later.
   _safeSave: ->
-    return unless @get('content.store')
+    return unless @get('content')
     unless @_isInflight()
       @_flushBuffers()
-      @get('content.store').commit()
+      @get('content').save()
     else
       @_debouncedSave()
 
   _isInflight: ->
     @get('content.isSaving') or @get('content.isLoading')
 
-  _debouncedSave: Ember.debounce (-> @_safeSave()), BUFFER_DELAY
+
+  _debouncedSave: (options = {}) ->
+    if options.now
+      @_safeSave()
+    else
+      Ember.run.debounce(@, '_safeSave', BUFFER_DELAY)
 
   # When the model is about to change out from under the controller we must
   # immediately save any pending changes and clear out the buffers.

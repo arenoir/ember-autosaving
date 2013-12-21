@@ -3,7 +3,9 @@
 
   should = chai.should();
 
-  FakeModel = Ember.Object.extend(Ember.Evented);
+  FakeModel = Ember.Object.extend(Ember.Evented, {
+    save: sinon.spy()
+  });
 
   describe.modelNotInFlight = function(tests) {
     return describe("when the model isn't inFlight", function() {
@@ -36,14 +38,14 @@
       });
       it("waits to save the model on a bufferedField", function() {
         this.controller.set(field, 'value');
-        this.store.commit.called.should.be["false"];
+        this.model.save.called.should.be["false"];
         this.clock.tick(1000);
-        return this.store.commit.called.should.be["true"];
+        return this.model.save.called.should.be["true"];
       });
       return it("immediately saves the model when it is swapped", function() {
         this.controller.set(field, 'value');
         this.controller.set('content', {});
-        this.store.commit.called.should.be["true"];
+        this.model.save.called.should.be["true"];
         return this.model.get(field).should.equal('value');
       });
     });
@@ -66,7 +68,7 @@
       return it("dosen't save the model on a bufferedField", function() {
         this.controller.set(field, 'value');
         this.clock.tick(1000);
-        return this.store.commit.called.should.be["false"];
+        return this.model.save.called.should.be["false"];
       });
     });
     return describe.modelInFlight(function() {
@@ -81,7 +83,7 @@
     return describe.modelNotInFlight(function() {
       return it("immediately saves the model on an instaSaveField", function() {
         this.controller.set(field, 'value');
-        return this.store.commit.called.should.be["true"];
+        return this.model.save.called.should.be["true"];
       });
     });
   };
@@ -92,11 +94,8 @@
     AutoSavingController = Ember.ObjectController.extend(Ember.AutoSaving);
     beforeEach(function() {
       this.clock = sinon.useFakeTimers();
-      this.store = {
-        commit: sinon.spy()
-      };
       return this.model = FakeModel.create({
-        store: this.store
+        save: sinon.spy()
       });
     });
     afterEach(function() {

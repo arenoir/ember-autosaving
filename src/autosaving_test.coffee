@@ -1,6 +1,8 @@
 should = chai.should()
 
-FakeModel = Ember.Object.extend(Ember.Evented)
+FakeModel = Ember.Object.extend(Ember.Evented,
+  save: sinon.spy()
+)
 
 describe.modelNotInFlight = (tests) ->
   describe "when the model isn't inFlight", ->
@@ -29,14 +31,14 @@ it.behavesLikeABufferedField = (field) ->
 
     it "waits to save the model on a bufferedField", ->
       @controller.set(field, 'value')
-      @store.commit.called.should.be.false
+      @model.save.called.should.be.false
       @clock.tick(1000)
-      @store.commit.called.should.be.true
+      @model.save.called.should.be.true
 
     it "immediately saves the model when it is swapped", ->
       @controller.set(field, 'value')
       @controller.set('content', {})
-      @store.commit.called.should.be.true
+      @model.save.called.should.be.true
       @model.get(field).should.equal 'value'
 
   describe.modelInFlight ->
@@ -55,7 +57,7 @@ it.behavesLikeANormalAttribute = (field) ->
     it "dosen't save the model on a bufferedField", ->
       @controller.set(field, 'value')
       @clock.tick(1000)
-      @store.commit.called.should.be.false
+      @model.save.called.should.be.false
 
   describe.modelInFlight ->
     it "writes and reads attributes directly to the model", ->
@@ -66,7 +68,7 @@ it.behavesLikeAnInstaSaveField = (field) ->
   describe.modelNotInFlight ->
     it "immediately saves the model on an instaSaveField", ->
       @controller.set(field, 'value')
-      @store.commit.called.should.be.true
+      @model.save.called.should.be.true
 
 
 describe "A controller using the autoSaving mixin", ->
@@ -74,8 +76,7 @@ describe "A controller using the autoSaving mixin", ->
 
   beforeEach ->
     @clock = sinon.useFakeTimers()
-    @store = {commit: sinon.spy()}
-    @model = FakeModel.create(store: @store)
+    @model = FakeModel.create(save: sinon.spy())
 
   afterEach -> @clock.restore()
 
