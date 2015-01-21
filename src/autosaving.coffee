@@ -38,7 +38,7 @@ Ember.AutoSaving = Ember.Mixin.create
   ).observes('content.isSaving')
 
   _flushBuffers: ->
-    @get('_buffers').forEach (key, value) =>
+    @get('_buffers').forEach (value, key) =>
       @get('content').set(key, value)
     @set('_buffers', Ember.Map.create())
 

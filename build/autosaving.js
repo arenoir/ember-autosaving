@@ -44,7 +44,7 @@
     _flushBuffers: function() {
       var _this = this;
 
-      this.get('_buffers').forEach(function(key, value) {
+      this.get('_buffers').forEach(function(value, key) {
         return _this.get('content').set(key, value);
       });
       return this.set('_buffers', Ember.Map.create());
